@@ -16,6 +16,13 @@
   contain-intrinsic-size: 1px 360px;
 }
 
+/* 随笔内竖图限高，保持等比缩放 */
+[data-essay-index] img {
+  max-height: 65vh;
+  width: auto;
+  object-fit: contain;
+}
+
 /* 点击跳转时预留 header 空间 */
 [data-essay-index] {
   scroll-margin-top: 5rem;
