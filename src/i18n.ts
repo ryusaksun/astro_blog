@@ -22,10 +22,6 @@ export const LANGUAGES = {
     next: '下一页',
     prev_post: '上一篇',
     next_post: '下一篇',
-    back_to_essays: '返回随笔',
-    month_navigation: '月份导航',
-    prev_image: '上一张',
-    next_image: '下一张',
   },
   'en-us': {
     Home: 'Home',
@@ -50,10 +46,6 @@ export const LANGUAGES = {
     next: 'Next',
     prev_post: 'Previous post',
     next_post: 'Next post',
-    back_to_essays: 'Back to essays',
-    month_navigation: 'Month navigation',
-    prev_image: 'Previous image',
-    next_image: 'Next image',
   },
   'zh-tw': {
     Home: '首頁',
@@ -78,10 +70,6 @@ export const LANGUAGES = {
     next: '下一頁',
     prev_post: '上一篇',
     next_post: '下一篇',
-    back_to_essays: '返回隨筆',
-    month_navigation: '月份導航',
-    prev_image: '上一張',
-    next_image: '下一張',
   },
   'ja-jp': {
     Home: 'ホーム',
@@ -106,9 +94,6 @@ export const LANGUAGES = {
     next: '次へ',
     prev_post: '前の投稿',
     next_post: '次の投稿',
-    back_to_essays: 'エッセイ一覧へ戻る',
-    month_navigation: '月ナビゲーション',
-    prev_image: '前の画像',
-    next_image: '次の画像',
   },
 }
+

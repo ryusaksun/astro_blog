@@ -22,12 +22,11 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>
 const { entry, prev, next } = Astro.props
 const { Content } = await entry.render()
 const { author } = Astro.locals.config
-const { translate: t } = Astro.locals
 
 ---
 
 <LayoutDefault
-  title={entry.data.title || t('Essays')}
+  title={entry.data.title || '随笔'}
   desc=""
   banner={entry.data.banner}
 >
@@ -68,7 +67,7 @@ const { translate: t } = Astro.locals
           class="flex items-center text-sm text-gray-400 hover:text-white transition-colors"
         >
           <span class="i-mdi-chevron-left mr-1"></span>
-          {t('prev_post')}
+          上一篇
         </a>
       ) : (
         <div></div>
@@ -78,7 +77,7 @@ const { translate: t } = Astro.locals
         href="/essays"
         class="text-sm text-gray-400 hover:text-white transition-colors"
       >
-        {t('back_to_essays')}
+        返回随笔
       </a>
 
       {next ? (
@@ -86,7 +85,7 @@ const { translate: t } = Astro.locals
           href={`/essays/${next.slug}/`}
           class="flex items-center text-sm text-gray-400 hover:text-white transition-colors"
         >
-          {t('next_post')}
+          下一篇
           <span class="i-mdi-chevron-right ml-1"></span>
         </a>
       ) : (
