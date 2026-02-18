@@ -23,14 +23,14 @@ const { author } = Astro.locals.config
       <div class="absolute left-2 top-2.5 -bottom-6 w-px bg-gray-600 essay-line-bottom"></div>
 
       <!-- 圆点 -->
-      <div class="w-4 h-4 rounded-full bg-gray-500 relative z-10 mt-0.5"></div>
+      <div class="w-4 h-4 rounded-full bg-[#002FA7] relative z-10 mt-0.5"></div>
     </div>
 
     <!-- 内容区域 -->
     <div class="flex-1 min-w-0 pb-4" un-max-lg="pb-2">
       <!-- 用户名和时间 -->
       <div class="flex items-center gap-2 mb-2">
-        <span class="text-white font-medium text-sm">{author}</span>
+        <span class="text-white font-bold text-sm">{author}</span>
         <span class="text-gray-500 text-xs">{formatEssayDate(essay.data.pubDate)}</span>
       </div>
 
