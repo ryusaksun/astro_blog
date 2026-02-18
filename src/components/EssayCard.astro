@@ -10,7 +10,7 @@ const { essay } = Astro.props
 const { author } = Astro.locals.config
 ---
 
-<!-- 随笔卡片 -->
+<!-- 带连接线的随笔卡片 -->
 <article
   class="relative"
   data-fullscreen-scope={`essay-${essay.slug}`}
@@ -18,6 +18,10 @@ const { author } = Astro.locals.config
   <!-- 圆点和内容 -->
   <div class="relative flex gap-3 py-6">
     <div class="flex-shrink-0 relative">
+      <!-- 连接线 - 穿过圆点中心连接上下 -->
+      <div class="absolute left-2 -top-6 h-[34px] w-px bg-gray-600 essay-line-top"></div>
+      <div class="absolute left-2 top-2.5 -bottom-6 w-px bg-gray-600 essay-line-bottom"></div>
+
       <!-- 圆点 -->
       <div class="w-4 h-4 rounded-full bg-gray-500 relative z-10 mt-0.5"></div>
     </div>

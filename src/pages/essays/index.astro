@@ -1,7 +1,7 @@
 ---
 import LayoutDefault from '~/layouts/LayoutDefault.astro'
 import EssayCard from '~/components/EssayCard.astro'
-import { getEssays, formatEssayMonthHeader } from '~/utils'
+import { getEssays } from '~/utils'
 import '~/styles/essay-timeline.css'
 
 const { pagination } = Astro.locals.config
@@ -26,13 +26,6 @@ allEssays.forEach((essay, index) => {
 function getEssayMonthKey(pubDate: Date | string) {
   const d = new Date(pubDate)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-}
-
-function isNewMonth(index: number) {
-  if (index === 0) return true
-  const cur = new Date(allEssays[index].data.pubDate)
-  const prev = new Date(allEssays[index - 1].data.pubDate)
-  return cur.getFullYear() !== prev.getFullYear() || cur.getMonth() !== prev.getMonth()
 }
 ---
 
@@ -60,26 +53,16 @@ function isNewMonth(index: number) {
       </div>
     </nav>
 
-    <section class="essay-timeline-section" un-flex="~ col">
+    <section contain-layout un-flex="~ col">
       {
         allEssays.map(async (essay, index) => {
           const { Content } = await essay.render()
-          const showMonthDivider = isNewMonth(index)
-          const d = new Date(essay.data.pubDate)
           return (
             <div
               data-essay-index={index}
               data-essay-month={getEssayMonthKey(essay.data.pubDate)}
               class={index >= batchSize ? 'essay-hidden' : ''}
             >
-              {showMonthDivider && (
-                <div class="essay-month-divider">
-                  <div class="essay-month-divider__dot"></div>
-                  <span class="essay-month-divider__label">
-                    {formatEssayMonthHeader(d.getFullYear(), d.getMonth() + 1)}
-                  </span>
-                </div>
-              )}
               <EssayCard essay={essay}>
                 <div class="prose prose-invert [&>p]:mb-0 [&>*]:text-gray-300 [&>*:last-child]:mb-0">
                   <Content />

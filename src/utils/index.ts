@@ -106,28 +106,20 @@ export function formatDate(date?: Date) {
   }
 }
 
-// 格式化时间为中文简洁格式（用于随笔）
+// 格式化时间为简洁格式，包含具体时间（用于随笔）
 export function formatEssayDate(date?: Date) {
   if (!date) return '--'
   try {
-    const month = date.getMonth() + 1
-    const day = date.getDate()
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
     const hours = String(date.getHours()).padStart(2, '0')
     const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${month}月${day}日 ${hours}:${minutes}`
+    return `${year}/${month}/${day} ${hours}:${minutes}`
   } catch (error) {
     console.error('Error formatting essay date:', error)
     return '--'
   }
-}
-
-// 格式化月份标题（用于随笔时间轴分隔）
-export function formatEssayMonthHeader(year: number, month: number) {
-  const currentYear = new Date().getFullYear()
-  if (year === currentYear) {
-    return `${month}月`
-  }
-  return `${year}年 ${month}月`
 }
 
 // 缓存分类映射结果

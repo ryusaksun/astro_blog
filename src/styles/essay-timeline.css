@@ -1,18 +1,13 @@
 /* 随笔时间线样式 - 共享样式 */
 
-/* 容器级连续竖线 */
-.essay-timeline-section {
-  position: relative;
+/* 隐藏第一个随笔的上连线 */
+[data-essay-index]:first-child article .essay-line-top {
+  display: none;
 }
 
-.essay-timeline-section::before {
-  content: '';
-  position: absolute;
-  left: 8px;       /* 16px 圆点的中心 */
-  top: 1.75rem;
-  bottom: 3rem;
-  width: 1px;
-  background: rgb(75, 85, 99); /* gray-600 */
+/* 隐藏最后一个随笔的下连线 */
+[data-essay-index]:last-child article .essay-line-bottom {
+  display: none;
 }
 
 /* 无限滚动：隐藏未加载的随笔 */
@@ -23,32 +18,6 @@
 /* 点击跳转时预留 header 空间 */
 [data-essay-index] {
   scroll-margin-top: 5rem;
-}
-
-/* 月份分隔标记 */
-.essay-month-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0 0.25rem;
-}
-
-.essay-month-divider__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgb(107, 114, 128); /* gray-500 */
-  margin-left: 3px;  /* 使 10px 圆点中心对齐 left:8px 轴线 */
-  flex-shrink: 0;
-  position: relative;
-  z-index: 10;
-}
-
-.essay-month-divider__label {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 /* ============================================
