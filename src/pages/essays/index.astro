@@ -1,44 +1,63 @@
 ---
 import LayoutDefault from '~/layouts/LayoutDefault.astro'
 import EssayCard from '~/components/EssayCard.astro'
-import Pagination from '~/components/Pagination.astro'
 import { getEssays } from '~/utils'
 import '~/styles/essay-timeline.css'
 
-const { translate: t } = Astro.locals
-
-// 获取随笔用于首页显示
 const { pagination } = Astro.locals.config
 const allEssays = await getEssays()
-const essays = allEssays.slice(0, pagination.essaysPerPage)
-const totalPages = Math.ceil(allEssays.length / pagination.essaysPerPage)
+const batchSize = pagination.essaysPerPage
 ---
 
 <LayoutDefault>
   <section contain-layout un-flex="~ col">
     {
-      essays.map(async (essay) => {
+      allEssays.map(async (essay, index) => {
         const { Content } = await essay.render()
         return (
-          <EssayCard essay={essay}>
-            <div class="prose prose-invert [&>p]:mb-0 [&>*]:text-gray-300 [&>*:last-child]:mb-0">
-              <Content />
-            </div>
-          </EssayCard>
+          <div data-essay-index={index} class={index >= batchSize ? 'essay-hidden' : ''}>
+            <EssayCard essay={essay}>
+              <div class="prose prose-invert [&>p]:mb-0 [&>*]:text-gray-300 [&>*:last-child]:mb-0">
+                <Content />
+              </div>
+            </EssayCard>
+          </div>
         )
       })
     }
-    {totalPages > 1 && (
-      <Pagination
-        showLeft={false}
-        showRight={true}
-        rightTitle={t('next')}
-        rightUrl={'/essays/page/2'}
-        currentPage={1}
-        totalPage={totalPages}
-        baseUrl="/essays/page/"
-        showPageCount={false}
-      />
-    )}
+    <div id="essay-sentinel" class="h-1"></div>
   </section>
 </LayoutDefault>
+
+<script define:vars={{ batchSize }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sentinel = document.getElementById('essay-sentinel')
+    if (!sentinel) return
+
+    let shown = batchSize
+    const allItems = document.querySelectorAll('[data-essay-index]')
+    const total = allItems.length
+
+    if (shown >= total) {
+      sentinel.remove()
+      return
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return
+
+      const end = Math.min(shown + batchSize, total)
+      for (let i = shown; i < end; i++) {
+        allItems[i].classList.remove('essay-hidden')
+      }
+      shown = end
+
+      if (shown >= total) {
+        observer.disconnect()
+        sentinel.remove()
+      }
+    })
+
+    observer.observe(sentinel)
+  })
+</script>

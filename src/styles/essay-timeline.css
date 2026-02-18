@@ -9,3 +9,8 @@ article:first-of-type .essay-line-top {
 article:last-of-type .essay-line-bottom {
   display: none;
 }
+
+/* 无限滚动：隐藏未加载的随笔 */
+.essay-hidden {
+  display: none;
+}
