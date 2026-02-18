@@ -6,8 +6,8 @@ timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 # Prompt the user to enter the title of the article
 read -p "Please enter the title of the article: " title
 
-# Generate the filename based on the title
-filename=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+# Generate the filename based on the title (remove unsafe path characters)
+filename=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr '/:*?"<>|\\' '-' | tr ' ' '-' | sed 's/-\{2,\}/-/g; s/^-//; s/-$//')
 
 # Concatenate the file path
 filepath="./src/content/posts/$filename.md"
@@ -23,7 +23,7 @@ touch "$filepath"
 
 # Write the header information of the article
 echo "---" >> "$filepath"
-echo "title: $title" >> "$filepath"
+echo "title: \"$title\"" >> "$filepath"
 echo "pubDate: $timestamp" >> "$filepath"
 echo "categories: []" >> "$filepath"
 echo "description: ''" >> "$filepath"

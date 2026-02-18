@@ -136,7 +136,7 @@ export function getPathFromCategory(category: string, category_map: {name: strin
   if (!category) return ''
 
   // 检查缓存
-  const cacheKey = `${category}-${category_map.length}`
+  const cacheKey = `${category}-${JSON.stringify(category_map)}`
   if (categoryPathCache.has(cacheKey)) {
     return categoryPathCache.get(cacheKey)!
   }
