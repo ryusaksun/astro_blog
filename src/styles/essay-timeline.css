@@ -21,6 +21,7 @@
   max-height: 75vh;
   width: auto;
   object-fit: contain;
+  border-radius: 12px;
 }
 
 /* 点击跳转时预留 header 空间 */
