@@ -4,9 +4,7 @@ import EssayCard from '~/components/EssayCard.astro'
 import { getEssays } from '~/utils'
 import '~/styles/essay-timeline.css'
 
-const { pagination } = Astro.locals.config
 const allEssays = await getEssays()
-const batchSize = pagination.essaysPerPage
 
 // Build month map for clock dial navigation
 type MonthEntry = { year: number; month: number; label: string; key: string; firstIndex: number }
@@ -59,9 +57,9 @@ function getEssayMonthKey(pubDate: Date | string) {
           const { Content } = await essay.render()
           return (
             <div
+              class="essay-item"
               data-essay-index={index}
               data-essay-month={getEssayMonthKey(essay.data.pubDate)}
-              class={index >= batchSize ? 'essay-hidden' : ''}
             >
               <EssayCard essay={essay}>
                 <div class="prose prose-invert [&>p]:mb-0 [&>*]:text-gray-300 [&>*:last-child]:mb-0">
@@ -72,70 +70,22 @@ function getEssayMonthKey(pubDate: Date | string) {
           )
         })
       }
-      <div id="essay-sentinel" class="h-1"></div>
     </section>
   </div>
 </LayoutDefault>
 
-<script define:vars={{ batchSize }}>
+<script>
   document.addEventListener('DOMContentLoaded', () => {
-    const sentinel = document.getElementById('essay-sentinel')
-    const allItems = document.querySelectorAll('[data-essay-index]')
-    const total = allItems.length
-    let shown = batchSize
-    let scrollObserver = null
-    let monthObserver = null
-
-    // --- Shared: reveal essays up to targetIndex ---
-    function revealUpTo(targetIndex) {
-      const end = Math.min(targetIndex + 1, total)
-      for (let i = 0; i < end; i++) {
-        allItems[i].classList.remove('essay-hidden')
-        if (monthObserver && allItems[i].dataset.essayMonth) {
-          monthObserver.observe(allItems[i])
-        }
-      }
-      if (end > shown) shown = end
-      checkComplete()
-    }
-
-    function checkComplete() {
-      if (shown >= total) {
-        if (scrollObserver) {
-          scrollObserver.disconnect()
-          scrollObserver = null
-        }
-        const s = document.getElementById('essay-sentinel')
-        if (s) s.remove()
-      }
-    }
-
-    // --- Infinite scroll ---
-    if (sentinel && shown < total) {
-      scrollObserver = new IntersectionObserver((entries) => {
-        if (!entries[0].isIntersecting) return
-        const end = Math.min(shown + batchSize, total)
-        for (let i = shown; i < end; i++) {
-          allItems[i].classList.remove('essay-hidden')
-          if (monthObserver && allItems[i].dataset.essayMonth) {
-            monthObserver.observe(allItems[i])
-          }
-        }
-        shown = end
-        checkComplete()
-      })
-      scrollObserver.observe(sentinel)
-    } else {
-      checkComplete()
-    }
+    const allItems = document.querySelectorAll<HTMLElement>('[data-essay-index]')
+    let monthObserver: IntersectionObserver | null = null
 
     // --- Clock dial navigation ---
     const dial = document.getElementById('clock-dial')
     if (!dial) return
 
-    const ticks = dial.querySelectorAll('.clock-dial__tick')
+    const ticks = dial.querySelectorAll<HTMLButtonElement>('.clock-dial__tick')
     const indicator = document.getElementById('clock-dial-indicator')
-    let activeTick = ticks.length > 0 ? ticks[0] : null
+    let activeTick: HTMLButtonElement | null = ticks.length > 0 ? ticks[0] : null
     let isClickScrolling = false
 
     // Set initial active tick
@@ -144,14 +94,14 @@ function getEssayMonthKey(pubDate: Date | string) {
       updateIndicator(activeTick)
     }
 
-    function setActiveTick(tick) {
+    function setActiveTick(tick: HTMLButtonElement) {
       if (activeTick) activeTick.classList.remove('clock-dial__tick--active')
       tick.classList.add('clock-dial__tick--active')
       activeTick = tick
       updateIndicator(tick)
     }
 
-    function updateIndicator(tick) {
+    function updateIndicator(tick: HTMLButtonElement | null) {
       if (!indicator || !tick) return
       const y = tick.offsetTop + tick.offsetHeight / 2 - 3.5
       indicator.style.transform = 'translateY(' + y + 'px)'
@@ -160,8 +110,7 @@ function getEssayMonthKey(pubDate: Date | string) {
     // --- Click handlers ---
     ticks.forEach((tick) => {
       tick.addEventListener('click', () => {
-        const targetIndex = parseInt(tick.dataset.monthIndex, 10)
-        revealUpTo(targetIndex)
+        const targetIndex = Number.parseInt(tick.dataset.monthIndex || '0', 10)
         setActiveTick(tick)
 
         const target = allItems[targetIndex]
@@ -188,9 +137,9 @@ function getEssayMonthKey(pubDate: Date | string) {
           }
         }
         if (topEntry) {
-          const monthKey = topEntry.target.dataset.essayMonth
+          const monthKey = (topEntry.target as HTMLElement).dataset.essayMonth
           if (monthKey) {
-            const matchTick = dial.querySelector('[data-month-key="' + monthKey + '"]')
+            const matchTick = dial.querySelector<HTMLButtonElement>('[data-month-key="' + monthKey + '"]')
             if (matchTick && matchTick !== activeTick) {
               setActiveTick(matchTick)
             }
@@ -200,11 +149,9 @@ function getEssayMonthKey(pubDate: Date | string) {
       { rootMargin: '-10% 0px -80% 0px' }
     )
 
-    // Observe initially visible essays
+    // Observe essays for month sync
     allItems.forEach((item) => {
-      if (!item.classList.contains('essay-hidden')) {
-        monthObserver.observe(item)
-      }
+      monthObserver?.observe(item)
     })
 
   })

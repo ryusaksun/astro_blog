@@ -10,9 +10,10 @@
   display: none;
 }
 
-/* 无限滚动：隐藏未加载的随笔 */
-.essay-hidden {
-  display: none;
+/* 长列表滚动优化，避免一次性绘制全部内容 */
+.essay-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 360px;
 }
 
 /* 点击跳转时预留 header 空间 */
