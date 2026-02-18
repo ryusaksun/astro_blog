@@ -36,8 +36,6 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
   <head>
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6754312885977055"
-     crossorigin="anonymous"></script>
     <SEO
       charset="utf-8"
       title={title}
@@ -226,12 +224,31 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
           });
         }
 
+        let scanTimer = null;
         function scanImages() {
           document.querySelectorAll('img').forEach((img) => {
             if (img.closest(`.${overlayClass}`)) return;
             bindImage(img);
           });
           rebuildGroups();
+        }
+        function debouncedScan() {
+          if (scanTimer) clearTimeout(scanTimer);
+          scanTimer = setTimeout(scanImages, 150);
+        }
+        function scanAddedNodes(nodes) {
+          let needRebuild = false;
+          for (const node of nodes) {
+            if (node.nodeType !== 1) continue;
+            const imgs = node.tagName === 'IMG' ? [node] : node.querySelectorAll ? Array.from(node.querySelectorAll('img')) : [];
+            for (const img of imgs) {
+              if (img.closest(`.${overlayClass}`)) continue;
+              if (img.dataset[boundFlag] === 'true') continue;
+              bindImage(img);
+              needRebuild = true;
+            }
+          }
+          if (needRebuild) rebuildGroups();
         }
 
         function showImageAtCurrentIndex() {
@@ -310,13 +327,23 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
           }
         });
 
-        const observer = new MutationObserver(() => {
-          scanImages();
+        const observer = new MutationObserver((mutations) => {
+          let hasAddedNodes = false;
+          for (const m of mutations) {
+            if (m.addedNodes.length > 0) {
+              hasAddedNodes = true;
+              scanAddedNodes(m.addedNodes);
+            }
+          }
+          if (!hasAddedNodes) return;
+          debouncedScan();
         });
 
         observer.observe(document.body, { childList: true, subtree: true });
       })();
     </script>
+    <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6754312885977055"
+     crossorigin="anonymous"></script>
   </body>
 </html>
 

@@ -94,12 +94,16 @@ function getEssayMonthKey(pubDate: Date | string) {
     const total = allItems.length
     let shown = batchSize
     let scrollObserver = null
+    let monthObserver = null
 
     // --- Shared: reveal essays up to targetIndex ---
     function revealUpTo(targetIndex) {
       const end = Math.min(targetIndex + 1, total)
       for (let i = 0; i < end; i++) {
         allItems[i].classList.remove('essay-hidden')
+        if (monthObserver && allItems[i].dataset.essayMonth) {
+          monthObserver.observe(allItems[i])
+        }
       }
       if (end > shown) shown = end
       checkComplete()
@@ -123,6 +127,9 @@ function getEssayMonthKey(pubDate: Date | string) {
         const end = Math.min(shown + batchSize, total)
         for (let i = shown; i < end; i++) {
           allItems[i].classList.remove('essay-hidden')
+          if (monthObserver && allItems[i].dataset.essayMonth) {
+            monthObserver.observe(allItems[i])
+          }
         }
         shown = end
         checkComplete()
@@ -156,8 +163,8 @@ function getEssayMonthKey(pubDate: Date | string) {
 
     function updateIndicator(tick) {
       if (!indicator || !tick) return
-      const top = tick.offsetTop + tick.offsetHeight / 2
-      indicator.style.top = top + 'px'
+      const y = tick.offsetTop + tick.offsetHeight / 2
+      indicator.style.transform = 'translateY(' + y + 'px)'
     }
 
     // --- Click handlers ---
@@ -179,7 +186,7 @@ function getEssayMonthKey(pubDate: Date | string) {
     })
 
     // --- Scroll sync ---
-    const monthObserver = new IntersectionObserver(
+    monthObserver = new IntersectionObserver(
       (entries) => {
         if (isClickScrolling) return
         let topEntry = null
@@ -210,20 +217,5 @@ function getEssayMonthKey(pubDate: Date | string) {
       }
     })
 
-    // Watch for newly revealed essays → add to scroll observer
-    const mutObserver = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === 'attributes' && m.attributeName === 'class') {
-          const el = m.target
-          if (!el.classList.contains('essay-hidden') && el.dataset.essayMonth) {
-            monthObserver.observe(el)
-          }
-        }
-      }
-    })
-
-    allItems.forEach((item) => {
-      mutObserver.observe(item, { attributes: true, attributeFilter: ['class'] })
-    })
   })
 </script>
