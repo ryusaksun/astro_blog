@@ -1,12 +1,12 @@
 /* 随笔时间线样式 - 共享样式 */
 
 /* 隐藏第一个随笔的上连线 */
-article:first-of-type .essay-line-top {
+[data-essay-index]:first-child article .essay-line-top {
   display: none;
 }
 
 /* 隐藏最后一个随笔的下连线 */
-article:last-of-type .essay-line-bottom {
+[data-essay-index]:last-child article .essay-line-bottom {
   display: none;
 }
 
