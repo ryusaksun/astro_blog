@@ -88,6 +88,10 @@ article.heti a code:hover {
   background-color: #c7254e;
 }
 
+article.heti img {
+  border-radius: 12px;
+}
+
 img:hover {
   cursor: zoom-in;
 }
