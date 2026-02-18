@@ -32,10 +32,8 @@ Essays are the most active collection with 100+ entries. Their filenames encode 
 
 Core functions used across pages:
 - `getPosts()` / `getEssays()` — fetch and sort by `pubDate` descending, with in-memory caching
-- `getCategories()` — builds `Map<string, Post[]>` from post metadata
 - `getPostDescription()` — strips markdown to plain text, truncates to 400 chars
 - `getEssayDisplayTitle()` — uses `title` if present, otherwise first 50 chars of body
-- `getPathFromCategory()` — maps Chinese category names to URL-safe paths via `category_map` in theme config
 
 ### Routing (all static, `src/pages/`)
 
@@ -43,14 +41,11 @@ Core functions used across pages:
 - `/posts/[slug]` and `/posts/page/[page]` — blog posts with pagination
 - `/essays`, `/essays/[slug]`, `/essays/page/[page]` — essays with timeline view
 - `/gallery` and `/gallery/page/[page]` — photo grid
-- `/categories` and `/categories/[category]` — post categories
-- `/archive` — chronological archive
-- `/about` — about page
 - `/atom.xml` — RSS feed (combines both posts and essays)
 
 ### Configuration
 
-- **Site config**: `src/theme.config.ts` — title, author, navigation, socials, pagination (`postsPerPage: 5`, `essaysPerPage: 10`), `category_map` for Chinese→URL path mapping
+- **Site config**: `src/theme.config.ts` — title, author, navigation, socials, pagination (`postsPerPage: 5`, `essaysPerPage: 10`)
 - **Astro config**: `astro.config.ts` — integrations (UnoCSS, robots.txt, sitemap), Shiki code highlighting with `one-dark-pro` theme
 - **Styling**: `uno.config.ts` — UnoCSS with dark theme by default. Custom styles in `src/styles/` (essay timeline, heti Chinese typography, global)
 
@@ -85,3 +80,8 @@ pubDate: "2024-01-01 12:00:00"  # required
 ```json
 { "url": "https://...", "thumbnail": "https://...", "date": "2025-08-07" }
 ```
+
+## 快捷指令
+
+- 用户发送 **`c`** — 立即提交（git add + commit，自动生成中文 commit message）
+- 用户发送 **`cp`** — 立即提交并推送（git add + commit + push）

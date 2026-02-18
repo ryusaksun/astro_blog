@@ -29,11 +29,6 @@ declare namespace App {
         name: string;
         href: string;
       }>,
-      /** category mapping */
-      category_map: Array<{
-        name: string;
-        path: string;
-      }>,
       /** pagination settings */
       pagination: {
         postsPerPage: number;

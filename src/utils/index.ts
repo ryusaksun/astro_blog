@@ -3,31 +3,6 @@ import sanitizeHtml from 'sanitize-html'
 import MarkdownIt from 'markdown-it'
 import type { Post, Essay } from '../types/index'
 
-export async function getCategories() {
-  try {
-    const posts = await getPosts()
-    const categories = new Map<string, Post[]>()
-
-    posts.forEach((post) => {
-      if (post.data.categories && Array.isArray(post.data.categories)) {
-        post.data.categories.forEach((c: string) => {
-          if (c && typeof c === 'string') {
-            const posts = categories.get(c) || []
-            posts.push(post)
-            categories.set(c, posts)
-          }
-        })
-      }
-    })
-
-    return categories
-  } catch (error) {
-    console.error('Error getting categories:', error)
-    return new Map()
-  }
-}
-
-
 // 缓存数据（仅在 build 时生效，dev 模式下跳过以支持 HMR）
 const isDev = import.meta.env.DEV
 let postsCache: Post[] | null = null
@@ -122,30 +97,8 @@ export function formatEssayDate(date?: Date) {
   }
 }
 
-// 缓存分类映射结果
-const categoryPathCache = new Map<string, string>()
-
 // 清理缓存函数（用于开发环境）
 export function clearCache() {
   postsCache = null
   essaysCache = null
-  categoryPathCache.clear()
-}
-
-export function getPathFromCategory(category: string, category_map: {name: string, path: string}[]) {
-  if (!category) return ''
-
-  // 检查缓存
-  const cacheKey = `${category}-${JSON.stringify(category_map)}`
-  if (categoryPathCache.has(cacheKey)) {
-    return categoryPathCache.get(cacheKey)!
-  }
-
-  // 查找映射
-  const mappingPath = category_map.find(l => l.name === category)
-  const result = mappingPath ? mappingPath.path : category
-
-  // 缓存结果
-  categoryPathCache.set(cacheKey, result)
-  return result
 }

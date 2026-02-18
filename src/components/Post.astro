@@ -1,6 +1,5 @@
 ---
-import { formatDate, getEssayDisplayTitle, getPathFromCategory } from '~/utils'
-import { THEME_CONFIG } from '~/theme.config'
+import { formatDate, getEssayDisplayTitle } from '~/utils'
 import type { CollectionEntry } from 'astro:content'
 import type { HTMLAttributes } from 'astro/types'
 
@@ -11,16 +10,12 @@ interface Props extends HTMLAttributes<'article'> {
 const { post, class: className, ...attrs } = Astro.props
 const { translate: t } = Astro.locals
 
-// 根据集合类型确定链接前缀和分类链接前缀
+// 根据集合类型确定链接前缀
 const isEssay = post.collection === 'essays'
 const linkPrefix = isEssay ? '/essays/' : '/posts/'
-const categoryPrefix = isEssay ? '/essay-categories/' : '/categories/'
 
 // 获取显示标题
 const displayTitle = isEssay ? getEssayDisplayTitle(post as CollectionEntry<'essays'>) : post.data.title
-
-// 获取分类（只有posts有分类）
-const categories = !isEssay && post.collection === 'posts' ? (post as CollectionEntry<'posts'>).data.categories : []
 ---
 
 <article
@@ -45,13 +40,6 @@ const categories = !isEssay && post.collection === 'posts' ? (post as Collection
         <div class="mt-2 text-3.5" un-max-lg="mt-1">
           <span>{t('posted_at')}</span>
           <time>{formatDate(post.data.pubDate)}</time>
-          {
-            categories.map((category: string) => (
-              <a class="ml-2.5" href={`${categoryPrefix}${getPathFromCategory(category, THEME_CONFIG.category_map)}`}>
-                # {category}
-              </a>
-            ))
-          }
         </div>
       </>
     )}
