@@ -43,7 +43,8 @@
   .clock-dial {
     display: block;
     position: sticky;
-    top: 5rem;
+    top: 50vh;
+    transform: translateY(-50%);
     align-self: flex-start;
     flex-shrink: 0;
     z-index: 10;
