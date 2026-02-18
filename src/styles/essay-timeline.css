@@ -75,7 +75,7 @@
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.3);
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   line-height: 1;
   padding: 6px 14px 6px 0;
   cursor: pointer;
@@ -116,7 +116,7 @@
 .clock-dial__year-label {
   position: relative;
   color: rgba(255, 255, 255, 0.45);
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 700;
   line-height: 1;
   padding: 10px 14px 4px 0;
