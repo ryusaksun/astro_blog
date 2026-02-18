@@ -20,7 +20,7 @@ export const THEME_CONFIG: App.Locals['config'] = {
   socials: [
     {
       name: "github",
-      href: "https://github.com/SUNSIR007?tab=repositories",
+      href: "https://github.com/ryusaksun",
     },
     {
       name: "rss",
