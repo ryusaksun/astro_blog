@@ -2,33 +2,58 @@
 import LayoutDefault from '~/layouts/LayoutDefault.astro'
 import Post from '~/components/Post.astro'
 import { getPosts, getPostDescription } from '~/utils'
-import Pagination from '~/components/Pagination.astro'
 
 const { pagination } = Astro.locals.config
-const posts = (await getPosts()).slice(0, pagination.postsPerPage)
-
-const { translate: t } = Astro.locals
-
+const allPosts = await getPosts()
+const batchSize = pagination.postsPerPage
 ---
 
 <LayoutDefault>
   <section contain-layout un-flex="~ col gap-7.5" un-max-lg="gap-2" class="first-post-mobile">
     {
-      posts.map((post, index) => (
-        <Post post={post} class={index === 0 ? 'first-post' : ''}>
-          <p class="line-clamp-4">{getPostDescription(post)}</p>
-        </Post>
+      allPosts.map((post, index) => (
+        <div data-post-index={index} class={index >= batchSize ? 'post-hidden' : ''}>
+          <Post post={post} class={index === 0 ? 'first-post' : ''}>
+            <p class="line-clamp-4">{getPostDescription(post)}</p>
+          </Post>
+        </div>
       ))
     }
-    <Pagination
-      showLeft={false}
-      showRight={true}
-      rightTitle={t('next')}
-      rightUrl={'/posts/page/2'}
-      currentPage={1}
-      totalPage={Math.ceil((await getPosts()).length / pagination.postsPerPage)}
-      baseUrl="/posts/page/"
-      showPageCount={false}
-    />
+    <div id="post-sentinel" class="h-1"></div>
   </section>
 </LayoutDefault>
+
+<style>
+  .post-hidden {
+    display: none;
+  }
+</style>
+
+<script define:vars={{ batchSize }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sentinel = document.getElementById('post-sentinel')
+    const allItems = document.querySelectorAll('[data-post-index]')
+    const total = allItems.length
+    let shown = batchSize
+
+    if (shown >= total) {
+      if (sentinel) sentinel.remove()
+      return
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return
+      const end = Math.min(shown + batchSize, total)
+      for (let i = shown; i < end; i++) {
+        allItems[i].classList.remove('post-hidden')
+      }
+      shown = end
+      if (shown >= total) {
+        observer.disconnect()
+        if (sentinel) sentinel.remove()
+      }
+    })
+
+    observer.observe(sentinel)
+  })
+</script>
