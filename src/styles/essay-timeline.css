@@ -14,3 +14,138 @@
 .essay-hidden {
   display: none;
 }
+
+/* 点击跳转时预留 header 空间 */
+[data-essay-index] {
+  scroll-margin-top: 5rem;
+}
+
+/* ============================================
+   钟表刻度式时间轴导航 — Clock Dial Timeline
+   ============================================ */
+
+.essays-page-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.essays-page-wrapper > section {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 导航容器 — 默认隐藏，桌面端显示 */
+.clock-dial {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .clock-dial {
+    display: block;
+    position: sticky;
+    top: 5rem;
+    align-self: flex-start;
+    flex-shrink: 0;
+    z-index: 10;
+    padding-right: 12px;
+  }
+}
+
+/* 竖向轨道容器 */
+.clock-dial__track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 竖向轨道线 */
+.clock-dial__track::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 月份刻度按钮 */
+.clock-dial__tick {
+  position: relative;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 6px 14px 6px 0;
+  cursor: pointer;
+  text-align: right;
+  white-space: nowrap;
+  transition: color 0.2s;
+  font-family: inherit;
+}
+
+.clock-dial__tick:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 月份水平刻度线 */
+.clock-dial__tick::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s, width 0.2s;
+}
+
+/* 活动月份 */
+.clock-dial__tick--active {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.clock-dial__tick--active::after {
+  background: rgba(255, 255, 255, 0.6);
+  width: 10px;
+}
+
+/* 年份标签 */
+.clock-dial__year-label {
+  position: relative;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 10px 14px 4px 0;
+  text-align: right;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+
+/* 年份长刻度线 */
+.clock-dial__year-label::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 60%;
+  width: 14px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 滑动指示器圆点 */
+.clock-dial__indicator {
+  position: absolute;
+  right: -3.5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+  transform: translateY(-50%);
+  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+  pointer-events: none;
+}

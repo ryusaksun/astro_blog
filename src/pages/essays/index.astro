@@ -7,57 +7,213 @@ import '~/styles/essay-timeline.css'
 const { pagination } = Astro.locals.config
 const allEssays = await getEssays()
 const batchSize = pagination.essaysPerPage
+
+// Build month map for clock dial navigation
+type MonthEntry = { year: number; month: number; label: string; key: string; firstIndex: number }
+const monthMap: MonthEntry[] = []
+const seen = new Set<string>()
+allEssays.forEach((essay, index) => {
+  const d = new Date(essay.data.pubDate)
+  const year = d.getFullYear()
+  const month = d.getMonth() + 1
+  const key = `${year}-${String(month).padStart(2, '0')}`
+  if (!seen.has(key)) {
+    seen.add(key)
+    monthMap.push({ year, month, label: `${month}月`, key, firstIndex: index })
+  }
+})
+
+function getEssayMonthKey(pubDate: Date | string) {
+  const d = new Date(pubDate)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
 ---
 
 <LayoutDefault>
-  <section contain-layout un-flex="~ col">
-    {
-      allEssays.map(async (essay, index) => {
-        const { Content } = await essay.render()
-        return (
-          <div data-essay-index={index} class={index >= batchSize ? 'essay-hidden' : ''}>
-            <EssayCard essay={essay}>
-              <div class="prose prose-invert [&>p]:mb-0 [&>*]:text-gray-300 [&>*:last-child]:mb-0">
-                <Content />
-              </div>
-            </EssayCard>
-          </div>
-        )
-      })
-    }
-    <div id="essay-sentinel" class="h-1"></div>
-  </section>
+  <div class="essays-page-wrapper">
+    <nav id="clock-dial" class="clock-dial" aria-label="月份导航">
+      <div class="clock-dial__track">
+        {monthMap.map((item, i) => {
+          const showYear = i === 0 || monthMap[i - 1].year !== item.year
+          return (
+            <Fragment>
+              {showYear && <div class="clock-dial__year-label">{item.year}</div>}
+              <button
+                class="clock-dial__tick"
+                data-month-index={item.firstIndex}
+                data-month-key={item.key}
+                type="button"
+              >
+                {item.label}
+              </button>
+            </Fragment>
+          )
+        })}
+        <div id="clock-dial-indicator" class="clock-dial__indicator"></div>
+      </div>
+    </nav>
+
+    <section contain-layout un-flex="~ col">
+      {
+        allEssays.map(async (essay, index) => {
+          const { Content } = await essay.render()
+          return (
+            <div
+              data-essay-index={index}
+              data-essay-month={getEssayMonthKey(essay.data.pubDate)}
+              class={index >= batchSize ? 'essay-hidden' : ''}
+            >
+              <EssayCard essay={essay}>
+                <div class="prose prose-invert [&>p]:mb-0 [&>*]:text-gray-300 [&>*:last-child]:mb-0">
+                  <Content />
+                </div>
+              </EssayCard>
+            </div>
+          )
+        })
+      }
+      <div id="essay-sentinel" class="h-1"></div>
+    </section>
+  </div>
 </LayoutDefault>
 
 <script define:vars={{ batchSize }}>
   document.addEventListener('DOMContentLoaded', () => {
     const sentinel = document.getElementById('essay-sentinel')
-    if (!sentinel) return
-
-    let shown = batchSize
     const allItems = document.querySelectorAll('[data-essay-index]')
     const total = allItems.length
+    let shown = batchSize
+    let scrollObserver = null
 
-    if (shown >= total) {
-      sentinel.remove()
-      return
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries[0].isIntersecting) return
-
-      const end = Math.min(shown + batchSize, total)
-      for (let i = shown; i < end; i++) {
+    // --- Shared: reveal essays up to targetIndex ---
+    function revealUpTo(targetIndex) {
+      const end = Math.min(targetIndex + 1, total)
+      for (let i = 0; i < end; i++) {
         allItems[i].classList.remove('essay-hidden')
       }
-      shown = end
+      if (end > shown) shown = end
+      checkComplete()
+    }
 
+    function checkComplete() {
       if (shown >= total) {
-        observer.disconnect()
-        sentinel.remove()
+        if (scrollObserver) {
+          scrollObserver.disconnect()
+          scrollObserver = null
+        }
+        const s = document.getElementById('essay-sentinel')
+        if (s) s.remove()
+      }
+    }
+
+    // --- Infinite scroll ---
+    if (sentinel && shown < total) {
+      scrollObserver = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return
+        const end = Math.min(shown + batchSize, total)
+        for (let i = shown; i < end; i++) {
+          allItems[i].classList.remove('essay-hidden')
+        }
+        shown = end
+        checkComplete()
+      })
+      scrollObserver.observe(sentinel)
+    } else {
+      checkComplete()
+    }
+
+    // --- Clock dial navigation ---
+    const dial = document.getElementById('clock-dial')
+    if (!dial) return
+
+    const ticks = dial.querySelectorAll('.clock-dial__tick')
+    const indicator = document.getElementById('clock-dial-indicator')
+    let activeTick = ticks.length > 0 ? ticks[0] : null
+    let isClickScrolling = false
+
+    // Set initial active tick
+    if (activeTick) {
+      activeTick.classList.add('clock-dial__tick--active')
+      updateIndicator(activeTick)
+    }
+
+    function setActiveTick(tick) {
+      if (activeTick) activeTick.classList.remove('clock-dial__tick--active')
+      tick.classList.add('clock-dial__tick--active')
+      activeTick = tick
+      updateIndicator(tick)
+    }
+
+    function updateIndicator(tick) {
+      if (!indicator || !tick) return
+      const top = tick.offsetTop + tick.offsetHeight / 2
+      indicator.style.top = top + 'px'
+    }
+
+    // --- Click handlers ---
+    ticks.forEach((tick) => {
+      tick.addEventListener('click', () => {
+        const targetIndex = parseInt(tick.dataset.monthIndex, 10)
+        revealUpTo(targetIndex)
+        setActiveTick(tick)
+
+        const target = allItems[targetIndex]
+        if (target) {
+          isClickScrolling = true
+          requestAnimationFrame(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          })
+          setTimeout(() => { isClickScrolling = false }, 1000)
+        }
+      })
+    })
+
+    // --- Scroll sync ---
+    const monthObserver = new IntersectionObserver(
+      (entries) => {
+        if (isClickScrolling) return
+        let topEntry = null
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (!topEntry || entry.boundingClientRect.top < topEntry.boundingClientRect.top) {
+              topEntry = entry
+            }
+          }
+        }
+        if (topEntry) {
+          const monthKey = topEntry.target.dataset.essayMonth
+          if (monthKey) {
+            const matchTick = dial.querySelector('[data-month-key="' + monthKey + '"]')
+            if (matchTick && matchTick !== activeTick) {
+              setActiveTick(matchTick)
+            }
+          }
+        }
+      },
+      { rootMargin: '-10% 0px -80% 0px' }
+    )
+
+    // Observe initially visible essays
+    allItems.forEach((item) => {
+      if (!item.classList.contains('essay-hidden')) {
+        monthObserver.observe(item)
       }
     })
 
-    observer.observe(sentinel)
+    // Watch for newly revealed essays → add to scroll observer
+    const mutObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          const el = m.target
+          if (!el.classList.contains('essay-hidden') && el.dataset.essayMonth) {
+            monthObserver.observe(el)
+          }
+        }
+      }
+    })
+
+    allItems.forEach((item) => {
+      mutObserver.observe(item, { attributes: true, attributeFilter: ['class'] })
+    })
   })
 </script>
