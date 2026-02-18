@@ -16,6 +16,7 @@ interface Props {
 const props = Astro.props
 const themeConfig = Astro.locals.config
 const { header } = Astro.locals.config
+const { translate: t } = Astro.locals
 
 const title = props.title ?? themeConfig.title
 const desc = props.desc ?? themeConfig.desc
@@ -65,7 +66,7 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
     <link rel="icon" type="image/png" href={iconPath} />
     <link rel="apple-touch-icon" href={iconPath} />
   </head>
-  <body>
+  <body data-prev-image-label={t('prev_image')} data-next-image-label={t('next_image')}>
     <div un-max-lg="flex flex-col gap-0" un-lg="flex flex-row-reverse justify-center gap-4 px-8" class="container contain-layout m-a">
       <div un-lg="sticky top-0 h-screen py-20 animate-fadein-left gap-8 min-h-screen" un-lg:flex="~ col justify-between items-start gap-4" class="px-7.5 pt-1 pb-0" un-max-lg="pt-0 pb-4">
         <Header />
@@ -79,6 +80,9 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
     <script is:inline>
       (() => {
         if (typeof window === 'undefined') return;
+
+        const prevImageLabel = document.body?.dataset.prevImageLabel || 'Previous image';
+        const nextImageLabel = document.body?.dataset.nextImageLabel || 'Next image';
 
         const overlayClass = 'image-fullscreen-backdrop';
         const visibleClass = 'is-visible';
@@ -136,13 +140,13 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
             overlay.className = overlayClass;
             overlay.setAttribute('aria-hidden', 'true');
             overlay.innerHTML = `
-              <button type="button" class="image-fullscreen-nav image-fullscreen-prev" aria-label="上一张">
+              <button type="button" class="image-fullscreen-nav image-fullscreen-prev" aria-label="${prevImageLabel}">
                 <span>&#10094;</span>
               </button>
               <div class="image-fullscreen-media">
                 <img alt="" />
               </div>
-              <button type="button" class="image-fullscreen-nav image-fullscreen-next" aria-label="下一张">
+              <button type="button" class="image-fullscreen-nav image-fullscreen-next" aria-label="${nextImageLabel}">
                 <span>&#10095;</span>
               </button>
             `;

@@ -4,9 +4,11 @@ import EssayCard from '~/components/EssayCard.astro'
 import { getEssays } from '~/utils'
 import '~/styles/essay-timeline.css'
 
-const { pagination } = Astro.locals.config
+const { pagination, locale } = Astro.locals.config
+const { translate: t } = Astro.locals
 const allEssays = await getEssays()
 const batchSize = pagination.essaysPerPage
+const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'short' })
 
 // Build month map for clock dial navigation
 type MonthEntry = { year: number; month: number; label: string; key: string; firstIndex: number }
@@ -19,7 +21,13 @@ allEssays.forEach((essay, index) => {
   const key = `${year}-${String(month).padStart(2, '0')}`
   if (!seen.has(key)) {
     seen.add(key)
-    monthMap.push({ year, month, label: `${month}月`, key, firstIndex: index })
+    monthMap.push({
+      year,
+      month,
+      label: monthFormatter.format(new Date(year, month - 1, 1)),
+      key,
+      firstIndex: index,
+    })
   }
 })
 
@@ -30,8 +38,8 @@ function getEssayMonthKey(pubDate: Date | string) {
 ---
 
 <LayoutDefault>
-  <div class="essays-page-wrapper">
-    <nav id="clock-dial" class="clock-dial" aria-label="月份导航">
+  <div class="essays-page-wrapper" data-batch-size={batchSize}>
+    <nav id="clock-dial" class="clock-dial" aria-label={t('month_navigation')}>
       <div class="clock-dial__track">
         {monthMap.map((item, i) => {
           const showYear = i === 0 || monthMap[i - 1].year !== item.year
@@ -77,8 +85,10 @@ function getEssayMonthKey(pubDate: Date | string) {
   </div>
 </LayoutDefault>
 
-<script define:vars={{ batchSize }}>
+<script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
+    const wrapper = document.querySelector('.essays-page-wrapper')
+    const batchSize = Number(wrapper?.getAttribute('data-batch-size') || '10')
     const sentinel = document.getElementById('essay-sentinel')
     const allItems = document.querySelectorAll('[data-essay-index]')
     const total = allItems.length
