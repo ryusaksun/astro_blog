@@ -1,5 +1,5 @@
 import rss from '@astrojs/rss';
-import { getPosts, getEssays, getEssayDisplayTitle } from '~/utils';
+import { getPosts, getEssays, getEssayDisplayTitle, getPostDescription } from '~/utils';
 import { THEME_CONFIG } from "~/theme.config";
 import type { APIContext } from 'astro';
 import type { Essay } from '~/types/index';
@@ -52,7 +52,7 @@ export async function GET(_context: APIContext) {
           content: sanitizeHtml(parser.render(content.body), { allowedTags, }),
           title: itemTitle,
           pubDate: content.data.pubDate,
-          description: 'description' in content.data ? (content.data.description as string) : '',
+          description: item.type === 'post' ? getPostDescription(content as any) : '',
           customData: content.data.customData,
           categories: 'categories' in content.data ? (content.data.categories as string[]) : [],
           commentsUrl: content.data.commentsUrl,

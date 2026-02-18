@@ -74,18 +74,20 @@ const pageNumbers = generatePageNumbers(currentPage, totalPage)
   {/* 修复后的分页导航 */}
   {totalPage > 1 && (
     <nav class="flex items-center justify-center gap-6">
-      {/* 上一页按钮 - 修复显示问题 */}
-      {currentPage > 1 ? (
-        <a
-          href={leftUrl || (baseUrl ? `${baseUrl}${currentPage - 1}` : '#')}
-          class="text-gray-400 hover:text-white transition-colors text-sm"
-        >
-          ← 上一页
-        </a>
-      ) : (
-        <span class="text-gray-600 cursor-not-allowed text-sm">
-          ← 上一页
-        </span>
+      {/* 上一页按钮 */}
+      {showLeft && (
+        currentPage > 1 ? (
+          <a
+            href={leftUrl || (baseUrl ? `${baseUrl}${currentPage - 1}` : '#')}
+            class="text-gray-400 hover:text-white transition-colors text-sm"
+          >
+            ← {t('prev')}
+          </a>
+        ) : (
+          <span class="text-gray-600 cursor-not-allowed text-sm">
+            ← {t('prev')}
+          </span>
+        )
       )}
 
       {/* 页面数字按钮 - 只高亮当前页 */}
@@ -106,18 +108,20 @@ const pageNumbers = generatePageNumbers(currentPage, totalPage)
         ))}
       </div>
 
-      {/* 下一页按钮 - 修复显示问题 */}
-      {currentPage < totalPage ? (
-        <a
-          href={rightUrl || (baseUrl ? `${baseUrl}${currentPage + 1}` : '#')}
-          class="text-gray-400 hover:text-white transition-colors text-sm"
-        >
-          下一页 →
-        </a>
-      ) : (
-        <span class="text-gray-600 cursor-not-allowed text-sm">
-          下一页 →
-        </span>
+      {/* 下一页按钮 */}
+      {showRight && (
+        currentPage < totalPage ? (
+          <a
+            href={rightUrl || (baseUrl ? `${baseUrl}${currentPage + 1}` : '#')}
+            class="text-gray-400 hover:text-white transition-colors text-sm"
+          >
+            {t('next')} →
+          </a>
+        ) : (
+          <span class="text-gray-600 cursor-not-allowed text-sm">
+            {t('next')} →
+          </span>
+        )
       )}
     </nav>
   )}
@@ -126,7 +130,7 @@ const pageNumbers = generatePageNumbers(currentPage, totalPage)
   {totalPage <= 1 && (showLeft || showRight) && (
     <div class="flex items-center justify-center gap-4">
       {
-        showLeft && (
+        showLeft && leftUrl && (
           <span class="inline-flex items-center">
             <i class="i-mdi-chevron-double-left icon" />
             <a href={leftUrl}>{leftTitle}</a>
@@ -134,7 +138,7 @@ const pageNumbers = generatePageNumbers(currentPage, totalPage)
         )
       }
       {
-        showRight && (
+        showRight && rightUrl && (
           <span class="inline-flex items-center">
             <a href={rightUrl}>{rightTitle}</a>
             <i class="i-mdi-chevron-double-right icon" />

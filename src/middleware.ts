@@ -15,7 +15,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (!translation) {
       return key;
     }
-    if (param) {
+    if (param != null) {
       return translation.replace('%d', param.toString());
     }
     return translation;

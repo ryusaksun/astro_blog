@@ -14,7 +14,7 @@ const { socials } = Astro.locals.config
       {
         socials.map((soc) => (
           <li>
-            <a href={soc.href} target="_blank" title={soc.name} class={`icon i-mdi-${soc.name}`} />
+            <a href={soc.href} target="_blank" rel="noopener noreferrer" title={soc.name} class={`icon i-mdi-${soc.name}`} />
           </li>
         ))
       }

@@ -1,5 +1,6 @@
 ---
-import { formatDate, getEssayDisplayTitle } from '~/utils'
+import { formatDate, getEssayDisplayTitle, getPathFromCategory } from '~/utils'
+import { THEME_CONFIG } from '~/theme.config'
 import type { CollectionEntry } from 'astro:content'
 import type { HTMLAttributes } from 'astro/types'
 
@@ -46,7 +47,7 @@ const categories = !isEssay && post.collection === 'posts' ? (post as Collection
           <time>{formatDate(post.data.pubDate)}</time>
           {
             categories.map((category: string) => (
-              <a class="ml-2.5" href={`${categoryPrefix}${category}`}>
+              <a class="ml-2.5" href={`${categoryPrefix}${getPathFromCategory(category, THEME_CONFIG.category_map)}`}>
                 # {category}
               </a>
             ))

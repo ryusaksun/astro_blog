@@ -4,68 +4,84 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Astro-based personal blog using the **astro-theme-typography** theme. Built with TypeScript, UnoCSS for styling, and optimized for static site generation.
+Astro-based personal blog (forked from [astro-theme-typography](https://github.com/moeyua/astro-theme-typography)) with three content types: posts (长文), essays (随笔), and photos (照片). Built with Astro 4, TypeScript, and UnoCSS. Deploys to Vercel as a static site.
 
 ## Key Commands
 
-### Development
-- `pnpm dev` - Start dev server with Astro check
-- `pnpm start` - Start dev server without type checking
-- `pnpm build` - Build production site with Astro check
-- `pnpm preview` - Preview production build locally
+- `pnpm dev` — dev server with `astro check` first
+- `pnpm start` — dev server without type checking
+- `pnpm build` — production build with `astro check`
+- `pnpm preview` — preview production build
+- `pnpm new-post` — interactive shell script to scaffold a new blog post
 
-### Content Management
-- `pnpm new-post` - Interactive script to create new blog posts
-- `pnpm update-theme` - Update theme configuration
-
-### Manual Content Creation
-Blog posts are stored in `src/content/posts/` as Markdown files with frontmatter:
-```yaml
----
-title: "Post Title"
-pubDate: "2024-01-01 12:00:00"
-categories: ["tech", "life"]
-description: "Post description"
----
-```
+No test suite exists. Validate changes with `pnpm build`.
 
 ## Architecture
 
-### Content Layer
-- **Collection Schema**: Defined in `src/content/config.ts` with Zod validation
-- **Posts**: Markdown files with required frontmatter (title, pubDate, categories)
-- **Categories**: Dynamic categorization through post metadata
+### Three Content Collections (`src/content/config.ts`)
 
-### Routing Structure
-- `/` - Homepage with recent posts
-- `/posts/page/[page]` - Paginated post listings 
-- `/posts/[slug]` - Individual blog posts
-- `/categories` - Category overview
-- `/categories/[category]` - Posts by category
-- `/archive` - Chronological archive
-- `/about` - About page
-- `/atom.xml` - RSS feed
+| Collection | Type | Directory | Schema notes |
+|---|---|---|---|
+| `posts` | content (Markdown) | `src/content/posts/` | Required: `title`, `pubDate`, `categories` |
+| `essays` | content (Markdown) | `src/content/essays/` | `title` is optional; no categories. Short-form microblog entries |
+| `photos` | data (JSON) | `src/content/photos/` | `url` (required), `thumbnail` (optional), `date` |
 
-### Styling System
-- **UnoCSS** configuration in `uno.config.ts`
-- **Dark theme** by default (`themeStyle: "dark"`)
-- **Typography-focused** with Chinese font support
-- **Responsive design** with mobile-first approach
+Essays are the most active collection with 100+ entries. Their filenames encode the date and a snippet of the content (e.g. `2026-02-18-刚送完莹-133050-216.md`).
 
-### Key Files
-- `src/theme.config.ts` - Site configuration (title, author, nav, socials)
-- `src/utils/index.ts` - Core utilities for posts, categories, and date formatting
-- `astro.config.ts` - Astro configuration with integrations
-- `uno.config.ts` - UnoCSS styling configuration
+### Content Utilities (`src/utils/index.ts`)
 
-## Content Workflow
-1. Create new posts via `pnpm new-post` or manually in `src/content/posts/`
-2. Add appropriate categories (categories are automatically discovered)
-3. Build and deploy - no database required
+Core functions used across pages:
+- `getPosts()` / `getEssays()` — fetch and sort by `pubDate` descending, with in-memory caching
+- `getCategories()` — builds `Map<string, Post[]>` from post metadata
+- `getPostDescription()` — strips markdown to plain text, truncates to 400 chars
+- `getEssayDisplayTitle()` — uses `title` if present, otherwise first 50 chars of body
+- `getPathFromCategory()` — maps Chinese category names to URL-safe paths via `category_map` in theme config
 
-## Development Notes
-- Uses static site generation - no server runtime
-- RSS feed auto-generated from posts
-- Sitemap auto-generated for SEO
-- Images can be added via frontmatter `banner` field
-- All content is Markdown-based with full TypeScript support
+### Routing (all static, `src/pages/`)
+
+- `/` — homepage (recent posts)
+- `/posts/[slug]` and `/posts/page/[page]` — blog posts with pagination
+- `/essays`, `/essays/[slug]`, `/essays/page/[page]` — essays with timeline view
+- `/gallery` and `/gallery/page/[page]` — photo grid
+- `/categories` and `/categories/[category]` — post categories
+- `/archive` — chronological archive
+- `/about` — about page
+- `/atom.xml` — RSS feed (combines both posts and essays)
+
+### Configuration
+
+- **Site config**: `src/theme.config.ts` — title, author, navigation, socials, pagination (`postsPerPage: 5`, `essaysPerPage: 10`), `category_map` for Chinese→URL path mapping
+- **Astro config**: `astro.config.ts` — integrations (UnoCSS, robots.txt, sitemap), Shiki code highlighting with `one-dark-pro` theme
+- **Styling**: `uno.config.ts` — UnoCSS with dark theme by default. Custom styles in `src/styles/` (essay timeline, heti Chinese typography, global)
+
+### Layout & Components
+
+Single layout `src/layouts/LayoutDefault.astro` wraps all pages. Path alias `~` maps to `src/`.
+
+Key components: `Header`, `Footer`, `Post`, `EssayCard`, `PhotoGrid`, `Pagination`, `ListItem`, `ListSection`.
+
+### Types
+
+`src/types/index.d.ts` exports `Post`, `Essay`, `Page`, `EssayPage` — all derived from Astro's `CollectionEntry` and `Page` generics.
+
+## Content Frontmatter
+
+**Post** (`src/content/posts/*.md`):
+```yaml
+title: "Post Title"        # required
+pubDate: "2024-01-01 12:00:00"  # required
+categories: ["tech"]       # required, array of strings
+description: "..."         # optional (auto-generated from body if missing)
+banner: ./image.jpg        # optional
+```
+
+**Essay** (`src/content/essays/*.md`):
+```yaml
+title: "Optional Title"    # optional
+pubDate: "2024-01-01 12:00:00"  # required
+```
+
+**Photo** (`src/content/photos/*.json`):
+```json
+{ "url": "https://...", "thumbnail": "https://...", "date": "2025-08-07" }
+```

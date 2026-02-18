@@ -27,24 +27,14 @@ export async function getCategories() {
   }
 }
 
-export async function getEssayCategories() {
-  try {
-    // Essays no longer have categories, so this function will return empty categories
-    const categories = new Map<string, Essay[]>()
 
-    return categories
-  } catch (error) {
-    console.error('Error getting essay categories:', error)
-    return new Map()
-  }
-}
-
-// 缓存数据
+// 缓存数据（仅在 build 时生效，dev 模式下跳过以支持 HMR）
+const isDev = import.meta.env.DEV
 let postsCache: Post[] | null = null
 let essaysCache: Essay[] | null = null
 
 export async function getPosts() {
-  if (postsCache) return postsCache
+  if (!isDev && postsCache) return postsCache
 
   try {
     const posts = await getCollection('posts')
@@ -53,7 +43,7 @@ export async function getPosts() {
       const bDate = b.data.pubDate || new Date()
       return bDate.getTime() - aDate.getTime()
     })
-    postsCache = posts
+    if (!isDev) postsCache = posts
     return posts
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -62,7 +52,7 @@ export async function getPosts() {
 }
 
 export async function getEssays() {
-  if (essaysCache) return essaysCache
+  if (!isDev && essaysCache) return essaysCache
 
   try {
     const essays = await getCollection('essays')
@@ -71,7 +61,7 @@ export async function getEssays() {
       const bDate = b.data.pubDate || new Date()
       return bDate.getTime() - aDate.getTime()
     })
-    essaysCache = essays
+    if (!isDev) essaysCache = essays
     return essays
   } catch (error) {
     console.error('Error fetching essays:', error)
@@ -117,7 +107,7 @@ export function formatDate(date?: Date) {
 }
 
 // 格式化时间为简洁格式，包含具体时间（用于随笔）
-export function formatEssayDate(date: Date) {
+export function formatEssayDate(date?: Date) {
   if (!date) return '--'
   try {
     const year = date.getFullYear()

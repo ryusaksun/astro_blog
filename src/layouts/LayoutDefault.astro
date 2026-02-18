@@ -19,7 +19,7 @@ const { header } = Astro.locals.config
 
 const title = props.title ?? themeConfig.title
 const desc = props.desc ?? themeConfig.desc
-const canonical = themeConfig.website
+const canonical = new URL(Astro.url.pathname, themeConfig.website).toString()
 const iconPath = '/mountains.png'
 
 const image =
