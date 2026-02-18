@@ -18,7 +18,7 @@
 
 /* 随笔内竖图限高，保持等比缩放 */
 [data-essay-index] img {
-  max-height: 65vh;
+  max-height: 75vh;
   width: auto;
   object-fit: contain;
 }
