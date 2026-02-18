@@ -9,7 +9,7 @@ const batchSize = pagination.postsPerPage
 ---
 
 <LayoutDefault>
-  <section contain-layout un-flex="~ col gap-7.5" un-max-lg="gap-2" class="first-post-mobile">
+  <section un-flex="~ col gap-7.5" un-max-lg="gap-2" class="first-post-mobile">
     {
       allPosts.map((post, index) => (
         <div data-post-index={index} class={index >= batchSize ? 'post-hidden' : ''}>

@@ -53,7 +53,7 @@ function getEssayMonthKey(pubDate: Date | string) {
       </div>
     </nav>
 
-    <section contain-layout un-flex="~ col">
+    <section un-flex="~ col">
       {
         allEssays.map(async (essay, index) => {
           const { Content } = await essay.render()
