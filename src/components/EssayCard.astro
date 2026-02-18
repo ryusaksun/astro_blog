@@ -16,11 +16,11 @@ const { author } = Astro.locals.config
   data-fullscreen-scope={`essay-${essay.slug}`}
 >
   <!-- 圆点和内容 -->
-  <div class="relative flex gap-3 py-6">
-    <div class="flex-shrink-0 relative">
+  <div class="relative flex items-start gap-3 py-6">
+    <div class="flex-shrink-0 relative h-5 flex items-center">
       <!-- 连接线 - 穿过圆点中心连接上下 -->
       <div class="absolute left-2 -top-6 h-8 w-px bg-gray-600 essay-line-top"></div>
-      <div class="absolute left-2 top-2 -bottom-6 w-px bg-gray-600 essay-line-bottom"></div>
+      <div class="absolute left-2 top-2.5 -bottom-6 w-px bg-gray-600 essay-line-bottom"></div>
 
       <!-- 圆点 -->
       <div class="w-4 h-4 rounded-full bg-gray-500 relative z-10"></div>
