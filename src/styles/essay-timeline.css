@@ -16,6 +16,12 @@
   contain-intrinsic-size: 1px 360px;
 }
 
+/* 点击月份跳转后切换为真实布局，避免估算高度影响定位 */
+.essay-item--expanded {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
 /* 随笔内竖图限高，保持等比缩放 */
 [data-essay-index] img {
   max-height: 75vh;

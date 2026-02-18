@@ -80,8 +80,9 @@ function getEssayMonthKey(pubDate: Date | string) {
     if (allItems.length === 0) return
 
     let monthObserver: IntersectionObserver | null = null
-    let settleTimer: number | null = null
-    let activeScrollId = 0
+    let clickScrollResetTimer: number | null = null
+    let hasExpandedLayout = false
+    let pendingJumpId = 0
 
     // --- Clock dial navigation ---
     const dial = document.getElementById('clock-dial')
@@ -111,64 +112,60 @@ function getEssayMonthKey(pubDate: Date | string) {
       indicator.style.transform = 'translateY(' + y + 'px)'
     }
 
-    function clearSettleTimer() {
-      if (settleTimer !== null) {
-        window.clearTimeout(settleTimer)
-        settleTimer = null
+    function clearClickScrollResetTimer() {
+      if (clickScrollResetTimer !== null) {
+        window.clearTimeout(clickScrollResetTimer)
+        clickScrollResetTimer = null
       }
     }
 
-    function getExpectedTop(target: HTMLElement) {
-      const raw = window.getComputedStyle(target).scrollMarginTop || '0'
-      const px = Number.parseFloat(raw)
-      return Number.isFinite(px) ? px : 0
+    function waitFrame() {
+      return new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve()
+        })
+      })
     }
 
-    function scrollToTargetWithSettle(target: HTMLElement) {
-      clearSettleTimer()
-      activeScrollId += 1
-      const scrollId = activeScrollId
-      const startedAt = performance.now()
-      const maxDuration = 2600
-      const settleDelay = 280
-      const settleInterval = 120
-      const tolerance = 8
+    async function ensureExpandedLayout() {
+      if (hasExpandedLayout) return
 
-      isClickScrolling = true
-      requestAnimationFrame(() => {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      allItems.forEach((item) => {
+        item.classList.add('essay-item--expanded')
       })
 
-      const settle = () => {
-        if (scrollId !== activeScrollId) return
+      // Wait two frames to let browser commit actual layout before smooth scroll.
+      await waitFrame()
+      await waitFrame()
+      hasExpandedLayout = true
+    }
 
-        const expectedTop = getExpectedTop(target)
-        const currentTop = target.getBoundingClientRect().top
-        const distance = Math.abs(currentTop - expectedTop)
-        const elapsed = performance.now() - startedAt
-
-        if (distance <= tolerance || elapsed > maxDuration) {
-          isClickScrolling = false
-          settleTimer = null
-          return
-        }
-
-        target.scrollIntoView({ behavior: 'auto', block: 'start' })
-        settleTimer = window.setTimeout(settle, settleInterval)
-      }
-
-      settleTimer = window.setTimeout(settle, settleDelay)
+    function beginClickScrolling(duration = 1400) {
+      clearClickScrollResetTimer()
+      isClickScrolling = true
+      clickScrollResetTimer = window.setTimeout(() => {
+        isClickScrolling = false
+        clickScrollResetTimer = null
+      }, duration)
     }
 
     // --- Click handlers ---
     ticks.forEach((tick) => {
-      tick.addEventListener('click', () => {
+      tick.addEventListener('click', async () => {
+        const jumpId = ++pendingJumpId
         const targetIndex = Number.parseInt(tick.dataset.monthIndex || '0', 10)
         setActiveTick(tick)
 
         const target = allItems[targetIndex]
         if (target) {
-          scrollToTargetWithSettle(target)
+          await ensureExpandedLayout()
+          if (jumpId !== pendingJumpId) return
+
+          beginClickScrolling()
+          requestAnimationFrame(() => {
+            if (jumpId !== pendingJumpId) return
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          })
         }
       })
     })
