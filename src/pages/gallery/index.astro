@@ -6,21 +6,10 @@ import { getCollection } from 'astro:content'
 // 获取所有照片
 const allPhotos = await getCollection('photos')
 
-// 分页设置
-const PHOTOS_PER_PAGE = 10
-const currentPage = 1
-const totalPhotos = allPhotos.length
-const totalPages = Math.ceil(totalPhotos / PHOTOS_PER_PAGE)
-
 // 按日期排序（最新的在前）
 const sortedPhotos = allPhotos.sort((a, b) =>
   new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 )
-
-// 获取当前页的照片
-const startIndex = (currentPage - 1) * PHOTOS_PER_PAGE
-const endIndex = startIndex + PHOTOS_PER_PAGE
-const photos = sortedPhotos.slice(startIndex, endIndex)
 
 const title = "Gallery"
 const description = "A collection of my photography work"
@@ -29,9 +18,7 @@ const description = "A collection of my photography work"
 <LayoutDefault title={title} desc={description}>
   <div class="gallery-page">
     <PhotoGrid
-      photos={photos}
-      currentPage={currentPage}
-      totalPages={totalPages}
+      photos={sortedPhotos}
     />
   </div>
 </LayoutDefault>

@@ -1,14 +1,11 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import Pagination from './Pagination.astro'
 
 export interface Props {
   photos: CollectionEntry<'photos'>[]
-  currentPage: number
-  totalPages: number
 }
 
-const { photos, currentPage, totalPages } = Astro.props
+const { photos } = Astro.props
 
 // 按日期排序（最新的在前）
 const sortedPhotos = photos.sort((a: CollectionEntry<'photos'>, b: CollectionEntry<'photos'>) =>
@@ -18,7 +15,7 @@ const sortedPhotos = photos.sort((a: CollectionEntry<'photos'>, b: CollectionEnt
 
 <section
   class="photo-gallery"
-  data-fullscreen-scope={`gallery-page-${currentPage}`}
+  data-fullscreen-scope="gallery"
 >
 
 
@@ -38,17 +35,6 @@ const sortedPhotos = photos.sort((a: CollectionEntry<'photos'>, b: CollectionEnt
         ))}
       </div>
 
-      <!-- 分页导航 -->
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPage={totalPages}
-          baseUrl="/gallery/page/"
-          leftUrl={currentPage === 2 ? '/gallery' : `/gallery/page/${currentPage - 1}`}
-          rightUrl={`/gallery/page/${currentPage + 1}`}
-          showPageCount={false}
-        />
-      )}
     </div>
   ) : (
     <div class="empty-state text-center py-16">
@@ -70,9 +56,5 @@ const sortedPhotos = photos.sort((a: CollectionEntry<'photos'>, b: CollectionEnt
 
   .photo-item img {
     @apply transition-opacity duration-300 hover:opacity-80;
-  }
-
-  .pagination a {
-    @apply no-underline;
   }
 </style>
