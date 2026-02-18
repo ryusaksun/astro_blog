@@ -3,57 +3,27 @@ import LayoutDefault from '~/layouts/LayoutDefault.astro'
 import Post from '~/components/Post.astro'
 import { getPosts, getPostDescription } from '~/utils'
 
-const { pagination } = Astro.locals.config
 const allPosts = await getPosts()
-const batchSize = pagination.postsPerPage
 ---
 
 <LayoutDefault>
   <section un-flex="~ col gap-7.5" un-max-lg="gap-2" class="first-post-mobile">
     {
       allPosts.map((post, index) => (
-        <div data-post-index={index} class={index >= batchSize ? 'post-hidden' : ''}>
+        <div class="post-item">
           <Post post={post} class={index === 0 ? 'first-post' : ''}>
             <p class="line-clamp-4">{getPostDescription(post)}</p>
           </Post>
         </div>
       ))
     }
-    <div id="post-sentinel" class="h-1"></div>
   </section>
 </LayoutDefault>
 
 <style>
-  .post-hidden {
-    display: none;
+  /* 避免滚动中批量插入节点导致的布局抖动，交给浏览器做按需渲染 */
+  .post-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 420px;
   }
 </style>
-
-<script define:vars={{ batchSize }}>
-  document.addEventListener('DOMContentLoaded', () => {
-    const sentinel = document.getElementById('post-sentinel')
-    const allItems = document.querySelectorAll('[data-post-index]')
-    const total = allItems.length
-    let shown = batchSize
-
-    if (shown >= total) {
-      if (sentinel) sentinel.remove()
-      return
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries[0].isIntersecting) return
-      const end = Math.min(shown + batchSize, total)
-      for (let i = shown; i < end; i++) {
-        allItems[i].classList.remove('post-hidden')
-      }
-      shown = end
-      if (shown >= total) {
-        observer.disconnect()
-        if (sentinel) sentinel.remove()
-      }
-    })
-
-    observer.observe(sentinel)
-  })
-</script>
