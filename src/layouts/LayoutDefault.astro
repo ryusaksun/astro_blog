@@ -64,7 +64,7 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
     <link rel="apple-touch-icon" href={iconPath} />
   </head>
   <body>
-    <div un-max-lg="flex flex-col gap-0" un-lg="flex flex-row-reverse justify-center gap-4 px-8" class="container contain-layout m-a">
+    <div un-max-lg="flex flex-col gap-0" un-lg="flex flex-row-reverse justify-center gap-4 px-8" class="container m-a">
       <div un-lg="sticky top-0 h-screen py-20 animate-fadein-left gap-8 min-h-screen" un-lg:flex="~ col justify-between items-start gap-4" class="px-7.5 pt-1 pb-0" un-max-lg="pt-0 pb-4">
         <Header />
         <Footer class="max-lg:hidden" />
@@ -350,10 +350,11 @@ const optimizedImage = new URL(image?.src??"/placeholder.png", Astro.url).toStri
       min-height: 100vh;
     }
 
-    /* 确保sticky定位的一致性 */
+    /* 确保sticky定位的一致性，GPU合成消除滚动抖动 */
     [un-lg*="sticky"] {
       position: sticky !important;
       top: 0 !important;
+      backface-visibility: hidden;
     }
   }
 </style>
