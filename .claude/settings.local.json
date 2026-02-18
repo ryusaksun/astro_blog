@@ -1,7 +1,28 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(pnpm build:*)",
+      "Bash(echo:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:claude.ai)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebSearch",
+      "WebFetch(domain:type.today)",
+      "WebFetch(domain:www.typewolf.com)",
+      "WebFetch(domain:7fontslike.com)",
+      "WebFetch(domain:maxibestof.one)",
+      "Bash(xargs basename:*)",
+      "Bash(npx astro build:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(node:*)",
+      "Bash(pkill:*)",
+      "Bash(git status:*)",
+      "Bash(git revert:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
